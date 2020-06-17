@@ -29,16 +29,16 @@ public class Cachecontroller {
 	@Autowired
 	private CustomerRepository customerRepository;
 
-	@CachePut(key = "#customer.id", value = "customers")
-	@RequestMapping(path = "save", method = RequestMethod.POST)
-	public Customer save(@RequestBody Customer customer) {
+	@CachePut(key = "#customer.id", value = "customers",condition = "#isCacheable==true")
+	@RequestMapping(path = "save/{isCacheable}", method = RequestMethod.POST)
+	public Customer save(@RequestBody Customer customer,@PathVariable boolean isCacheable) {
 		customerRepository.save(customer);
 		return customerRepository.findById(customer.getId());
 	}
 
-	@Cacheable(key = "#id", value = "customers",unless="#result != 0")
-	@RequestMapping(path = "customer/{id}", method = RequestMethod.GET)
-	public Customer getCustomer(@PathVariable String id) {
+	@Cacheable(key = "#id", value = "customers",condition = "#isCacheable==true")
+	@RequestMapping(path = "customer/{id}/{isCacheable}", method = RequestMethod.GET)
+	public Customer getCustomer(@PathVariable String id,@PathVariable boolean isCacheable) {
 		return customerRepository.findById(id);
 	}
 
@@ -55,7 +55,7 @@ public class Cachecontroller {
 		customerRepository.delete(id);
 		return id;
 	}
-	@Cacheable(value = "customers", key="#")
+
 	@RequestMapping(path = "customers", method = RequestMethod.GET)
 	public Map<String, Object> getAllCustomer() {
 		return customerRepository.findAll();
